@@ -1,0 +1,558 @@
+# 📘 SQL Interview Preparation – Day 3
+
+## Topic: Scalar Subqueries, Correlated Subqueries & Department-wise Problems
+
+---
+
+# 🎯 Learning Objectives
+
+Today you learned:
+
+* Scalar Subqueries
+* Correlated Subqueries
+* MAX()
+* AVG()
+* Department-wise Comparisons
+* Difference between Company-Level and Department-Level Queries
+
+---
+
+# Database Used
+
+## Employee Table
+
+```sql
+CREATE TABLE Employee (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(50),
+    department_id INT,
+    salary DECIMAL(10,2),
+    joining_date DATE
+);
+
+INSERT INTO Employee VALUES
+(1,'Sai',101,50000,'2022-01-10'),
+(2,'Ravi',102,75000,'2021-05-15'),
+(3,'Priya',101,65000,'2020-03-20'),
+(4,'Kiran',103,90000,'2019-07-25'),
+(5,'Anu',102,55000,'2023-02-18'),
+(6,'Rahul',101,70000,'2021-11-12'),
+(7,'Deepa',103,85000,'2020-08-30'),
+(8,'John',102,60000,'2022-09-14'),
+(9,'Meena',101,45000,'2024-01-05'),
+(10,'Arjun',103,95000,'2018-12-01');
+```
+
+---
+
+# Question 1
+
+## Find employees who earn the highest salary in the company.
+
+### Solution
+
+```sql
+SELECT emp_id,
+       emp_name,
+       salary
+FROM Employee
+WHERE salary =
+(
+    SELECT MAX(salary)
+    FROM Employee
+);
+```
+
+### Concept
+
+* Scalar Subquery
+* MAX()
+* Entire Company
+
+---
+
+# Question 2
+
+## Find employees whose salary is greater than the average salary.
+
+### Solution
+
+```sql
+SELECT emp_id,
+       emp_name,
+       salary
+FROM Employee
+WHERE salary >
+(
+    SELECT AVG(salary)
+    FROM Employee
+);
+```
+
+### Concept
+
+* Scalar Subquery
+* AVG()
+
+---
+
+# Question 3
+
+## Find employees whose salary is greater than the average salary of their own department.
+
+### Solution
+
+```sql
+SELECT emp_name,
+       salary,
+       department_id
+FROM Employee e
+WHERE salary >
+(
+    SELECT AVG(salary)
+    FROM Employee
+    WHERE department_id = e.department_id
+);
+```
+
+### Concept
+
+* Correlated Subquery
+* AVG()
+* Department-wise Comparison
+
+---
+
+# Question 4
+
+## Find the department having the highest average salary.
+
+### Solution
+
+```sql
+SELECT department_id,
+       AVG(salary) AS avg_salary
+FROM Employee
+GROUP BY department_id
+ORDER BY avg_salary DESC
+LIMIT 1;
+```
+
+### Concept
+
+* GROUP BY
+* AVG()
+* ORDER BY
+* LIMIT
+
+---
+
+# Interview Solution (Subquery)
+
+```sql
+SELECT department_id,
+       AVG(salary) AS avg_salary
+FROM Employee
+GROUP BY department_id
+HAVING AVG(salary)=
+(
+    SELECT MAX(avg_salary)
+    FROM
+    (
+        SELECT AVG(salary) AS avg_salary
+        FROM Employee
+        GROUP BY department_id
+    ) dept_avg
+);
+```
+
+---
+
+# Question 5
+
+## Find employees who earn the maximum salary in their department.
+
+### Solution
+
+```sql
+SELECT emp_name,
+       department_id,
+       salary
+FROM Employee e
+WHERE salary =
+(
+    SELECT MAX(salary)
+    FROM Employee
+    WHERE department_id = e.department_id
+);
+```
+
+### Concept
+
+* Correlated Subquery
+* MAX()
+* Department-wise Filtering
+
+---
+
+# Today's Doubt 1
+
+## Difference Between Question 4 and Question 5
+
+### Question 4
+
+Find the department having the highest average salary.
+
+Output
+
+| Department | Average Salary |
+| ---------- | -------------: |
+| 103        |          90000 |
+
+We return the **department**.
+
+---
+
+### Question 5
+
+Find employees who earn the maximum salary in their department.
+
+Output
+
+| Employee | Department | Salary |
+| -------- | ---------- | -----: |
+| Rahul    | 101        |  70000 |
+| Ravi     | 102        |  75000 |
+| Arjun    | 103        |  95000 |
+
+We return the **employees**.
+
+---
+
+# Memory Trick
+
+Question says
+
+> Which Department?
+
+↓
+
+GROUP BY Department
+
+↓
+
+Calculate AVG()
+
+↓
+
+Return Department
+
+---
+
+Question says
+
+> Which Employee?
+
+↓
+
+Find Maximum Salary
+
+↓
+
+Compare Employee Salary
+
+↓
+
+Return Employee
+
+---
+
+# Today's Doubt 2
+
+## Why Correlated Subquery?
+
+Question
+
+Find employees earning maximum salary in their department.
+
+For Rahul
+
+```text
+Department = 101
+
+↓
+
+Maximum Salary of Department 101
+
+↓
+
+70000
+
+↓
+
+Rahul Salary = 70000
+
+↓
+
+TRUE
+```
+
+For Ravi
+
+```text
+Department = 102
+
+↓
+
+Maximum Salary = 75000
+
+↓
+
+TRUE
+```
+
+Every employee compares against a different department average/maximum.
+
+Therefore,
+
+Use Correlated Subquery.
+
+---
+
+# Today's Doubt 3
+
+## Company-Level vs Department-Level
+
+### Company-Level
+
+One comparison value for everyone.
+
+Example
+
+```sql
+SELECT *
+FROM Employee
+WHERE salary=
+(
+SELECT MAX(salary)
+FROM Employee
+);
+```
+
+Everyone compares against
+
+```text
+95000
+```
+
+Only one comparison.
+
+---
+
+### Department-Level
+
+Every employee compares with a different value.
+
+Example
+
+```sql
+WHERE department_id=e.department_id
+```
+
+Department 101
+
+↓
+
+70000
+
+Department 102
+
+↓
+
+75000
+
+Department 103
+
+↓
+
+95000
+
+Different comparison values.
+
+Therefore,
+
+Correlated Subquery.
+
+---
+
+# Interview Decision Tree
+
+## Highest Salary
+
+Entire Company?
+
+↓
+
+YES
+
+↓
+
+```sql
+MAX()
+```
+
+Simple Subquery
+
+---
+
+Highest Salary
+
+Each Department?
+
+↓
+
+YES
+
+↓
+
+Correlated Subquery
+
+---
+
+Highest Average
+
+Department?
+
+↓
+
+GROUP BY
+
+↓
+
+AVG()
+
+↓
+
+ORDER BY or Subquery
+
+---
+
+# Common Mistakes
+
+### Wrong
+
+```sql
+WHERE department_id IN
+(
+SELECT MAX(salary)
+FROM Employee
+GROUP BY department_id
+);
+```
+
+Reason
+
+Comparing
+
+```text
+department_id
+
+with
+
+salary
+```
+
+Different columns.
+
+---
+
+### Wrong
+
+```sql
+SELECT AVG(salary)
+FROM Employee
+GROUP BY department_id
+```
+
+Used with
+
+```sql
+salary >
+(
+subquery
+)
+```
+
+Reason
+
+Subquery returns multiple rows.
+
+---
+
+### Correct
+
+Use Correlated Subquery
+
+```sql
+WHERE salary >
+(
+SELECT AVG(salary)
+FROM Employee
+WHERE department_id=e.department_id
+);
+```
+
+---
+
+# Interview Tips
+
+✅ Entire Company → Simple Subquery
+
+✅ Each Department → Correlated Subquery
+
+✅ Department Result → GROUP BY
+
+✅ Employee Result → Correlated Subquery
+
+Always ask yourself:
+
+> "Am I comparing everyone with one value, or is each row compared with a different value?"
+
+If one value → Scalar Subquery
+
+If different values → Correlated Subquery
+
+---
+
+# LeetCode Practice
+
+Today's Recommended Problems
+
+* LeetCode #176 – Second Highest Salary
+* LeetCode #184 – Department Highest Salary
+
+---
+
+# Revision Checklist
+
+* [x] MAX()
+* [x] AVG()
+* [x] Scalar Subquery
+* [x] Correlated Subquery
+* [x] GROUP BY
+* [x] Department-wise Comparison
+* [x] Company vs Department Logic
+
+---
+
+# Tomorrow's Topics (Day 4)
+
+* Second Highest Salary
+* Nth Highest Salary
+* DENSE_RANK()
+* RANK()
+* ROW_NUMBER()
+* Top N Records
+* LeetCode #176
+* LeetCode #177
+* LeetCode #184
