@@ -1,0 +1,618 @@
+# 📘 SQL Interview Preparation – Day 5
+
+# Topic: Window Functions (ROW_NUMBER, RANK, DENSE_RANK)
+
+---
+
+# 🎯 Learning Objectives
+
+Today you learned:
+
+* Window Functions
+* ROW_NUMBER()
+* RANK()
+* DENSE_RANK()
+* PARTITION BY
+* Top N Records
+* LeetCode #178
+* LeetCode #185
+* Difference between ROW_NUMBER(), RANK(), and DENSE_RANK()
+
+---
+
+# Why Window Functions?
+
+Until now we solved problems using:
+
+* Subqueries
+* Correlated Subqueries
+* GROUP BY
+
+But interviewers often ask:
+
+* Top 3 Salaries
+* Top N Employees
+* Second Highest Salary in Each Department
+* Employee Ranking
+
+Window Functions make these problems much easier.
+
+---
+
+# What is a Window Function?
+
+A Window Function performs calculations across a group of rows while still returning every individual row.
+
+Unlike GROUP BY:
+
+* GROUP BY returns one row per group.
+* Window Functions return every row with additional calculated information.
+
+---
+
+# ROW_NUMBER()
+
+## Definition
+
+Assigns a unique number to every row.
+
+Even if two employees have the same salary,
+their row numbers are different.
+
+---
+
+## Syntax
+
+```sql
+ROW_NUMBER() OVER
+(
+    ORDER BY salary DESC
+)
+```
+
+---
+
+## Example
+
+| Employee | Salary | ROW_NUMBER |
+| -------- | ------ | ---------: |
+| Kiran    | 95000  |          1 |
+| Deepa    | 90000  |          2 |
+| Arjun    | 90000  |          3 |
+| Rahul    | 70000  |          4 |
+
+Notice
+
+Two employees have salary 90000
+
+Still
+
+```text
+2
+
+3
+```
+
+Different numbers.
+
+---
+
+# RANK()
+
+## Definition
+
+Employees with the same salary receive the same rank.
+
+The next rank is skipped.
+
+---
+
+## Syntax
+
+```sql
+RANK() OVER
+(
+    ORDER BY salary DESC
+)
+```
+
+---
+
+## Example
+
+| Salary | Rank |
+| ------ | ---: |
+| 95000  |    1 |
+| 90000  |    2 |
+| 90000  |    2 |
+| 85000  |    4 |
+
+Notice
+
+Rank 3 is skipped.
+
+---
+
+# DENSE_RANK()
+
+## Definition
+
+Employees with the same salary receive the same rank.
+
+No ranks are skipped.
+
+---
+
+## Syntax
+
+```sql
+DENSE_RANK() OVER
+(
+    ORDER BY salary DESC
+)
+```
+
+---
+
+## Example
+
+| Salary | Dense Rank |
+| ------ | ---------: |
+| 95000  |          1 |
+| 90000  |          2 |
+| 90000  |          2 |
+| 85000  |          3 |
+
+Perfect for interview questions involving
+Top N Distinct Salaries.
+
+---
+
+# Difference Between the Three
+
+| Salary | ROW_NUMBER | RANK | DENSE_RANK |
+| ------ | ---------: | ---: | ---------: |
+| 95000  |          1 |    1 |          1 |
+| 90000  |          2 |    2 |          2 |
+| 90000  |          3 |    2 |          2 |
+| 85000  |          4 |    4 |          3 |
+
+---
+
+# PARTITION BY
+
+## Definition
+
+PARTITION BY divides the table into groups.
+
+Ranking starts from 1 inside every group.
+
+---
+
+## Syntax
+
+```sql
+DENSE_RANK() OVER
+(
+    PARTITION BY departmentId
+    ORDER BY salary DESC
+)
+```
+
+---
+
+## Example
+
+Department 101
+
+| Employee | Salary | Rank |
+| -------- | ------ | ---: |
+| Rahul    | 70000  |    1 |
+| Priya    | 65000  |    2 |
+| Sai      | 50000  |    3 |
+
+Department 102
+
+| Employee | Salary | Rank |
+| -------- | ------ | ---: |
+| Ravi     | 75000  |    1 |
+| John     | 60000  |    2 |
+| Anu      | 55000  |    3 |
+
+Notice
+
+Ranking restarts.
+
+---
+
+# SQL Execution Flow
+
+```text
+Employee Table
+
+↓
+
+PARTITION BY Department
+
+↓
+
+Sort Salary DESC
+
+↓
+
+Assign Rank
+
+↓
+
+Create Temporary Table
+
+↓
+
+Filter Required Rank
+
+↓
+
+Final Output
+```
+
+---
+
+# Today's Interview Question
+
+## LeetCode #185
+
+Department Top Three Salaries
+
+---
+
+# SQL Solution
+
+```sql
+SELECT
+    d.name AS Department,
+    t.Employee,
+    t.Salary
+FROM
+(
+    SELECT
+        name AS Employee,
+        salary AS Salary,
+        departmentId,
+        DENSE_RANK() OVER
+        (
+            PARTITION BY departmentId
+            ORDER BY salary DESC
+        ) AS rnk
+    FROM Employee
+) t
+JOIN Department d
+ON t.departmentId = d.id
+WHERE t.rnk <= 3;
+```
+
+---
+
+# Why DENSE_RANK()?
+
+Suppose
+
+| Salary |
+| ------ |
+| 90000  |
+| 85000  |
+| 85000  |
+| 70000  |
+
+ROW_NUMBER()
+
+```text
+1
+2
+3
+4
+```
+
+Wrong
+
+Will miss Top 3 Distinct Salaries.
+
+---
+
+RANK()
+
+```text
+1
+2
+2
+4
+```
+
+Wrong
+
+Rank 3 is skipped.
+
+---
+
+DENSE_RANK()
+
+```text
+1
+2
+2
+3
+```
+
+Correct.
+
+---
+
+# Execution Diagram
+
+```text
+Employee Table
+
+↓
+
+Apply DENSE_RANK()
+
+↓
+
+Temporary Table
+
+Employee
+
+Salary
+
+Rank
+
+↓
+
+JOIN Department
+
+↓
+
+WHERE Rank <= 3
+
+↓
+
+Final Output
+```
+
+---
+
+# When to Use Each Function
+
+## ROW_NUMBER()
+
+Use when
+
+Need exactly N rows.
+
+Examples
+
+* First 5 Employees
+* Top 10 Students
+
+---
+
+## RANK()
+
+Use when
+
+Competition Ranking.
+
+Example
+
+```text
+1
+
+2
+
+2
+
+4
+```
+
+---
+
+## DENSE_RANK()
+
+Use when
+
+Need Top N Distinct Values.
+
+Examples
+
+* Top 3 Salaries
+* Second Highest Salary
+* Department Highest Salary
+
+---
+
+# Today's Doubts
+
+## Why DENSE_RANK() instead of ROW_NUMBER()?
+
+ROW_NUMBER()
+
+```text
+90000
+
+85000
+
+85000
+
+70000
+```
+
+Ranks
+
+```text
+1
+
+2
+
+3
+
+4
+```
+
+70000 becomes Rank 4
+
+Incorrect.
+
+---
+
+DENSE_RANK()
+
+Ranks
+
+```text
+1
+
+2
+
+2
+
+3
+```
+
+Correct.
+
+---
+
+# Memory Trick
+
+Need
+
+Exactly 3 Rows
+
+↓
+
+ROW_NUMBER()
+
+---
+
+Need
+
+Top 3 Distinct Salaries
+
+↓
+
+DENSE_RANK()
+
+---
+
+Need
+
+Competition Ranking
+
+↓
+
+RANK()
+
+---
+
+# Window Function Pattern
+
+```sql
+SELECT *
+FROM
+(
+    SELECT *,
+           DENSE_RANK() OVER
+           (
+               PARTITION BY group_column
+               ORDER BY value DESC
+           ) AS rnk
+    FROM table_name
+) t
+WHERE rnk <= N;
+```
+
+Memorize this pattern.
+
+---
+
+# LeetCode Solved Today
+
+✅ LeetCode #185 – Department Top Three Salaries
+
+Concepts Covered
+
+* Window Functions
+* DENSE_RANK()
+* PARTITION BY
+* Derived Tables
+* JOIN
+
+---
+
+# Revision Checklist
+
+✅ Window Functions
+
+✅ ROW_NUMBER()
+
+✅ RANK()
+
+✅ DENSE_RANK()
+
+✅ PARTITION BY
+
+✅ OVER()
+
+✅ Top N Records
+
+✅ Department Top Three Salaries
+
+---
+
+# Common Interview Questions
+
+* Find Second Highest Salary
+* Find Top 3 Salaries
+* Find Highest Salary in Each Department
+* Find Second Highest Salary in Each Department
+* Rank Employees by Salary
+* Top N Employees
+
+---
+
+# Interview Cheat Sheet
+
+| Requirement           | Function     |
+| --------------------- | ------------ |
+| Unique Row Number     | ROW_NUMBER() |
+| Competition Ranking   | RANK()       |
+| Top N Distinct Values | DENSE_RANK() |
+| Group-wise Ranking    | PARTITION BY |
+
+---
+
+# Tomorrow (Day 6)
+
+Topics
+
+* Advanced Joins
+* Self Join
+* Joins with Subqueries
+* EXISTS vs JOIN
+* DELETE using Subqueries
+* UPDATE using Subqueries
+* Top 15 SQL Interview Questions
+* LeetCode SQL Join Problems
+
+---
+
+# 🎯 Final Takeaway
+
+Before choosing a Window Function, ask yourself:
+
+**Do I need unique row numbers, competition ranking, or distinct salary ranking?**
+
+* **ROW_NUMBER()** → Unique row numbers.
+* **RANK()** → Competition ranking (skips ranks after ties).
+* **DENSE_RANK()** → Top N distinct values (no skipped ranks).
+
+Understanding this decision will help you solve many SQL interview questions quickly and correctly.
