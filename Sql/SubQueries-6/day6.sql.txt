@@ -1,0 +1,718 @@
+# 📘 SQL Interview Preparation – Day 6
+
+# Topic: SQL Date Functions
+
+---
+
+# 🎯 Learning Objectives
+
+Today you learned:
+
+* DATE Data Type
+* CURDATE()
+* NOW()
+* YEAR()
+* MONTH()
+* MONTHNAME()
+* DAYNAME()
+* DAYOFWEEK()
+* DATEDIFF()
+* DATE_SUB()
+* Date Filtering
+* Interview Date Queries
+
+---
+
+# Why Date Functions?
+
+Most business applications store dates.
+
+Examples:
+
+* Employee Joining Date
+* Customer Registration Date
+* Order Date
+* Delivery Date
+* Payment Date
+
+Interviewers frequently ask questions based on dates.
+
+---
+
+# Date Functions Covered
+
+| Function    | Purpose                      |
+| ----------- | ---------------------------- |
+| CURDATE()   | Current Date                 |
+| NOW()       | Current Date & Time          |
+| YEAR()      | Extract Year                 |
+| MONTH()     | Extract Month Number         |
+| MONTHNAME() | Extract Month Name           |
+| DAYNAME()   | Extract Day Name             |
+| DAYOFWEEK() | Day Number                   |
+| DATEDIFF()  | Difference Between Two Dates |
+| DATE_SUB()  | Subtract Days/Months/Years   |
+
+---
+
+# CURDATE()
+
+## Definition
+
+Returns today's date.
+
+### Syntax
+
+```sql
+SELECT CURDATE();
+```
+
+Example Output
+
+```text
+2026-06-29
+```
+
+---
+
+# NOW()
+
+## Definition
+
+Returns current date and current time.
+
+### Syntax
+
+```sql
+SELECT NOW();
+```
+
+Example
+
+```text
+2026-06-29 11:45:18
+```
+
+---
+
+# YEAR()
+
+Extracts the year from a date.
+
+### Syntax
+
+```sql
+SELECT YEAR(order_date)
+FROM Orders;
+```
+
+Example
+
+```text
+2025
+```
+
+---
+
+# MONTH()
+
+Extracts month number.
+
+### Syntax
+
+```sql
+SELECT MONTH(order_date)
+FROM Orders;
+```
+
+Example
+
+```text
+1
+2
+3
+4
+```
+
+---
+
+# MONTHNAME()
+
+Returns month name.
+
+### Syntax
+
+```sql
+SELECT MONTHNAME(order_date)
+FROM Orders;
+```
+
+Example
+
+```text
+January
+
+February
+
+March
+
+April
+```
+
+---
+
+# DAYNAME()
+
+Returns day name.
+
+### Syntax
+
+```sql
+SELECT DAYNAME(order_date)
+FROM Orders;
+```
+
+Example
+
+```text
+Monday
+
+Tuesday
+
+Friday
+
+Sunday
+```
+
+---
+
+# DAYOFWEEK()
+
+Returns day number.
+
+| Day       | Number |
+| --------- | ------ |
+| Sunday    | 1      |
+| Monday    | 2      |
+| Tuesday   | 3      |
+| Wednesday | 4      |
+| Thursday  | 5      |
+| Friday    | 6      |
+| Saturday  | 7      |
+
+---
+
+# DATEDIFF()
+
+## Definition
+
+Calculates the number of days between two dates.
+
+---
+
+### Syntax
+
+```sql
+DATEDIFF(end_date, start_date)
+```
+
+Remember
+
+```text
+Delivery Date
+
+-
+
+Order Date
+```
+
+---
+
+### Example
+
+```sql
+SELECT
+customer_name,
+DATEDIFF(delivery_date,order_date)
+FROM Orders;
+```
+
+Output
+
+| Customer | Days |
+| -------- | ---- |
+| Sai      | 5    |
+| Ravi     | 4    |
+| Priya    | 7    |
+
+---
+
+# DATE_SUB()
+
+## Definition
+
+Subtracts days, months or years from a date.
+
+---
+
+### Syntax
+
+```sql
+DATE_SUB(CURDATE(),INTERVAL 30 DAY)
+```
+
+Example
+
+Today's Date
+
+```text
+2026-06-29
+```
+
+Result
+
+```text
+2026-05-30
+```
+
+---
+
+# SQL Execution Flow
+
+```text
+CURDATE()
+
+↓
+
+Today's Date
+
+↓
+
+Subtract 30 Days
+
+↓
+
+Compare Order Date
+
+↓
+
+Return Matching Rows
+```
+
+---
+
+# Questions Practiced
+
+## Question 1
+
+Display current date.
+
+```sql
+SELECT CURDATE();
+```
+
+---
+
+## Question 2
+
+Display current date and time.
+
+```sql
+SELECT NOW();
+```
+
+---
+
+## Question 3
+
+Find orders placed in April.
+
+```sql
+SELECT *
+FROM Orders
+WHERE MONTH(order_date)=4;
+```
+
+---
+
+## Question 4
+
+Find orders placed in 2025.
+
+```sql
+SELECT *
+FROM Orders
+WHERE YEAR(order_date)=2025;
+```
+
+---
+
+## Question 5
+
+Find orders placed after March 1, 2025.
+
+```sql
+SELECT *
+FROM Orders
+WHERE order_date>'2025-03-01';
+```
+
+Important
+
+Always write dates inside single quotes.
+
+✅ Correct
+
+```sql
+'2025-03-01'
+```
+
+❌ Wrong
+
+```sql
+2025-03-01
+```
+
+---
+
+## Question 6
+
+Find delivery duration.
+
+```sql
+SELECT
+customer_name,
+DATEDIFF(delivery_date,order_date)
+AS delivery_days
+FROM Orders;
+```
+
+---
+
+## Question 7
+
+Orders delivered after more than 5 days.
+
+```sql
+SELECT *
+FROM Orders
+WHERE DATEDIFF(delivery_date,order_date)>5;
+```
+
+---
+
+## Question 8
+
+Display month names.
+
+```sql
+SELECT
+MONTHNAME(order_date)
+FROM Orders;
+```
+
+---
+
+## Question 9
+
+Display day names.
+
+```sql
+SELECT
+DAYNAME(order_date)
+FROM Orders;
+```
+
+---
+
+## Question 10
+
+Customers who placed orders in the last 30 days.
+
+Recommended Solution
+
+```sql
+SELECT
+customer_name,
+order_date
+FROM Orders
+WHERE order_date>=DATE_SUB(CURDATE(),INTERVAL 30 DAY);
+```
+
+Alternative Solution
+
+```sql
+SELECT
+customer_name
+FROM Orders
+WHERE DATEDIFF(CURDATE(),order_date)<=30;
+```
+
+---
+
+# Derived Table Optimization
+
+Instead of calculating
+
+```sql
+DATEDIFF()
+```
+
+multiple times,
+
+create a temporary table.
+
+Example
+
+```sql
+SELECT *
+FROM
+(
+SELECT
+customer_name,
+DATEDIFF(delivery_date,order_date)
+AS delivery_days
+FROM Orders
+)t;
+```
+
+This improves readability.
+
+---
+
+# Common Mistakes Today
+
+## Mistake 1
+
+Wrong
+
+```sql
+MONTH(4)
+```
+
+Correct
+
+```sql
+MONTH(order_date)=4
+```
+
+---
+
+## Mistake 2
+
+Wrong
+
+```sql
+DATE(order_date)>2025-03-01
+```
+
+Correct
+
+```sql
+order_date>'2025-03-01'
+```
+
+---
+
+## Mistake 3
+
+Wrong
+
+```sql
+date_diff()
+```
+
+Correct
+
+```sql
+DATEDIFF()
+```
+
+---
+
+## Mistake 4
+
+Wrong
+
+```sql
+DATEDIFF(delivery_date-order_date)
+```
+
+Correct
+
+```sql
+DATEDIFF(delivery_date,order_date)
+```
+
+---
+
+## Mistake 5
+
+Wrong
+
+```sql
+orders_date(dayname(1))
+```
+
+Correct
+
+```sql
+DAYNAME(order_date)
+```
+
+---
+
+# Interview Patterns
+
+Find Orders in Month
+
+```sql
+WHERE MONTH(order_date)=4;
+```
+
+---
+
+Find Orders in Year
+
+```sql
+WHERE YEAR(order_date)=2025;
+```
+
+---
+
+Last 30 Days
+
+```sql
+WHERE order_date>=DATE_SUB(CURDATE(),INTERVAL 30 DAY);
+```
+
+---
+
+Weekend Orders
+
+```sql
+WHERE DAYNAME(order_date)
+IN ('Saturday','Sunday');
+```
+
+or
+
+```sql
+WHERE DAYOFWEEK(order_date)
+IN (1,7);
+```
+
+---
+
+Average Delivery Time
+
+```sql
+SELECT
+AVG(DATEDIFF(delivery_date,order_date))
+FROM Orders;
+```
+
+---
+
+Customers with Delivery Time Greater than Average
+
+```sql
+SELECT
+customer_name
+FROM Orders
+WHERE DATEDIFF(delivery_date,order_date)>
+(
+SELECT
+AVG(DATEDIFF(delivery_date,order_date))
+FROM Orders
+);
+```
+
+---
+
+# Revision Checklist
+
+✅ CURDATE()
+
+✅ NOW()
+
+✅ YEAR()
+
+✅ MONTH()
+
+✅ MONTHNAME()
+
+✅ DAYNAME()
+
+✅ DAYOFWEEK()
+
+✅ DATEDIFF()
+
+✅ DATE_SUB()
+
+✅ Date Filtering
+
+✅ Last 30 Days
+
+✅ Weekend Orders
+
+---
+
+# Interview Cheat Sheet
+
+| Requirement         | Function    |
+| ------------------- | ----------- |
+| Current Date        | CURDATE()   |
+| Current Date & Time | NOW()       |
+| Extract Year        | YEAR()      |
+| Extract Month       | MONTH()     |
+| Month Name          | MONTHNAME() |
+| Day Name            | DAYNAME()   |
+| Days Between Dates  | DATEDIFF()  |
+| Last N Days         | DATE_SUB()  |
+
+---
+
+# Today's Takeaway
+
+Before writing any date query, ask yourself:
+
+1. **Do I need to extract a part of the date?** → `YEAR()`, `MONTH()`, `DAYNAME()`
+2. **Do I need to compare dates?** → Compare the `DATE` column directly.
+3. **Do I need to calculate the difference?** → `DATEDIFF()`
+4. **Do I need recent records (last 30 days, last 6 months)?** → `DATE_SUB()`
+
+---
+
+# Tomorrow (Day 7)
+
+Topics
+
+* String Functions
+* CONCAT()
+* UPPER()
+* LOWER()
+* SUBSTRING()
+* LENGTH()
+* TRIM()
+* REPLACE()
+* LEFT()
+* RIGHT()
+* Interview String Questions
+* LeetCode SQL String Problems
+
+---
+
+# 🎯 Final Goal
+
+You can now confidently solve SQL interview questions involving:
+
+* Date extraction
+* Date filtering
+* Date calculations
+* Delivery analysis
+* Last N days queries
+* Weekend queries
+* Average date-based calculations
+
+These are among the most commonly asked SQL interview topics for freshers and experienced candidates alike.
