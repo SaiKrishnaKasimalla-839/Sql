@@ -1,0 +1,413 @@
+📘 SQL Interview Preparation
+Module 06 – Date Functions (Part 3)
+Topic: Advanced Date Functions & Interview Patterns
+📑 Table of Contents
+1. Learning Objectives
+2. DATE_ADD()
+3. LAST_DAY()
+4. DATE_FORMAT()
+5. EXTRACT()
+6. First Order in Every Month
+7. SQL Execution Flow
+8. Common Mistakes
+9. Interview Questions
+10. Interview Cheat Sheet
+11. Revision Notes
+12. Homework
+13. LeetCode Practice
+🎯 Learning Objectives
+
+By the end of this module, you will be able to:
+
+✔ Add days, months and years to dates
+
+✔ Find the last day of any month
+
+✔ Display dates in different formats
+
+✔ Extract specific parts from dates
+
+✔ Solve interview questions using advanced date functions
+
+✔ Understand when to use LAST_DAY() and when NOT to use it
+
+1️⃣ DATE_ADD()
+📖 Definition
+
+DATE_ADD() is used to add an interval (days, months, years, etc.) to a date.
+
+📝 Syntax
+DATE_ADD(date, INTERVAL value DAY)
+💻 Example 1 – Add 10 Days
+SELECT
+order_id,
+customer_name,
+order_date,
+DATE_ADD(order_date,INTERVAL 10 DAY) AS expected_delivery
+FROM Orders;
+📊 Output
+Order Date	Expected Delivery
+2025-01-10	2025-01-20
+2025-02-18	2025-02-28
+🧠 Dry Run
+Order Date
+
+2025-01-10
+
+↓
+
+Add 10 Days
+
+↓
+
+2025-01-20
+💻 Example 2 – Add 2 Months
+SELECT
+customer_name,
+DATE_ADD(order_date,INTERVAL 2 MONTH)
+FROM Orders;
+2️⃣ LAST_DAY()
+📖 Definition
+
+Returns the last date of the month for a given date.
+
+📝 Syntax
+LAST_DAY(order_date)
+💻 Example
+SELECT
+customer_name,
+order_date,
+LAST_DAY(order_date) AS month_end
+FROM Orders;
+📊 Output
+Order Date	Month End
+2025-02-18	2025-02-28
+2025-04-20	2025-04-30
+🧠 Dry Run
+Order Date
+
+2025-04-20
+
+↓
+
+LAST_DAY()
+
+↓
+
+2025-04-30
+🚨 Today's Doubt
+❌ Wrong Query
+SELECT customer_name
+FROM Orders
+ORDER BY LAST_DAY(order_date)
+LIMIT 1;
+❓ Why is it Wrong?
+
+Suppose we have:
+
+Customer	Order Date
+Sai	2025-01-10
+Ravi	2025-01-20
+
+Both rows become
+
+LAST_DAY()
+
+↓
+
+2025-01-31
+
+Both values are the same.
+
+LAST_DAY() tells SQL when the month ends, not which order came first.
+
+✅ Correct Solution
+SELECT
+customer_name,
+order_date
+FROM Orders o
+WHERE order_date=
+(
+SELECT MIN(order_date)
+FROM Orders
+WHERE YEAR(order_date)=YEAR(o.order_date)
+AND MONTH(order_date)=MONTH(o.order_date)
+);
+🧠 SQL Execution Flow
+Orders Table
+
+↓
+
+Current Row
+
+↓
+
+Find Month
+
+↓
+
+Find MIN(order_date)
+
+↓
+
+Compare
+
+↓
+
+Return First Order
+📊 Dry Run
+
+Orders Table
+
+Customer	Order Date
+Sai	2025-01-10
+Ravi	2025-01-20
+
+Current Row
+
+Sai
+
+↓
+
+Month = January
+
+↓
+
+MIN(order_date)
+
+↓
+
+2025-01-10
+
+↓
+
+Equal
+
+↓
+
+Return Sai
+
+Current Row
+
+Ravi
+
+↓
+
+Month = January
+
+↓
+
+MIN(order_date)
+
+↓
+
+2025-01-10
+
+↓
+
+Not Equal
+
+↓
+
+Ignore
+3️⃣ DATE_FORMAT()
+📖 Definition
+
+Displays dates in different formats.
+
+📝 Syntax
+DATE_FORMAT(date,'%format')
+Example 1
+SELECT
+DATE_FORMAT(order_date,'%d-%b-%Y')
+FROM Orders;
+
+Output
+
+10-Jan-2025
+Example 2
+SELECT
+DATE_FORMAT(order_date,'%M %Y')
+FROM Orders;
+
+Output
+
+January 2025
+
+February 2025
+
+March 2025
+📋 DATE_FORMAT Cheat Sheet
+Format	Output
+%d	01-31
+%m	01-12
+%b	Jan
+%M	January
+%y	25
+%Y	2025
+%W	Monday
+%a	Mon
+4️⃣ EXTRACT()
+📖 Definition
+
+Extracts a specific part from a date.
+
+Extract Month
+SELECT
+EXTRACT(MONTH FROM order_date)
+FROM Orders;
+Extract Year
+SELECT
+EXTRACT(YEAR FROM order_date)
+FROM Orders;
+Extract Day
+SELECT
+EXTRACT(DAY FROM order_date)
+FROM Orders;
+⭐ Interview Questions
+Question 1
+
+Find orders placed in the current month.
+
+SELECT *
+FROM Orders
+WHERE MONTH(order_date)=MONTH(CURDATE())
+AND YEAR(order_date)=YEAR(CURDATE());
+Question 2
+
+Find orders placed in the previous month.
+
+SELECT *
+FROM Orders
+WHERE MONTH(order_date)=MONTH(DATE_SUB(CURDATE(),INTERVAL 1 MONTH))
+AND YEAR(order_date)=YEAR(DATE_SUB(CURDATE(),INTERVAL 1 MONTH));
+Question 3
+
+Find orders placed in the current year.
+
+SELECT *
+FROM Orders
+WHERE YEAR(order_date)=YEAR(CURDATE());
+🎯 Interview Tips
+Use DATE_ADD()
+
+When the question says
+
+After 30 Days
+
+Next Month
+
+Next Year
+Use LAST_DAY()
+
+When the question says
+
+Month End
+
+Last Date of Month
+Use DATE_FORMAT()
+
+When the interviewer asks
+
+Display date as
+
+10-Jan-2025
+
+January 2025
+
+Monday
+Use EXTRACT()
+
+When only one part of the date is needed.
+
+⚠️ Common Mistakes
+❌ Wrong
+LAST_DAY(order_date)
+
+ORDER BY
+
+LIMIT 1
+
+For finding the first order.
+
+✅ Correct
+
+Use
+
+MIN(order_date)
+
+inside a correlated subquery.
+
+❌ Wrong
+DATE_FORMAT(order_date)
+
+Without format.
+
+✅ Correct
+DATE_FORMAT(order_date,'%d-%b-%Y')
+📌 Interview Cheat Sheet
+Requirement	Function
+Add Days	DATE_ADD()
+Last Day of Month	LAST_DAY()
+Display Month Name	DATE_FORMAT('%M')
+Display DD-Mon-YYYY	DATE_FORMAT('%d-%b-%Y')
+Extract Month	EXTRACT(MONTH FROM date)
+Extract Year	EXTRACT(YEAR FROM date)
+📝 Revision Notes
+
+✅ DATE_ADD()
+
+✅ LAST_DAY()
+
+✅ DATE_FORMAT()
+
+✅ EXTRACT()
+
+✅ First Order of Every Month
+
+✅ Correlated Subquery
+
+🎯 Homework
+Question 1 ⭐⭐
+
+Find the last order placed in every month.
+
+Question 2 ⭐⭐⭐
+
+Find customers whose orders were placed on the last day of the month.
+
+Question 3 ⭐⭐⭐⭐
+
+Display all orders in this format:
+
+Monday, 10 January 2025
+Question 4 ⭐⭐⭐⭐⭐
+
+Find the month that has the maximum number of orders.
+
+💻 Today's LeetCode Practice
+✅ LeetCode #197 – Rising Temperature
+
+Concepts Covered
+
+Date Comparison
+Self Join
+Date Functions
+✅ LeetCode #1193 – Monthly Transactions I
+
+Concepts Covered
+
+MONTH()
+DATE_FORMAT()
+GROUP BY
+Aggregate Functions
+🎯 Key Takeaways
+DATE_ADD() is used to add intervals to dates.
+LAST_DAY() returns the last calendar day of a month but cannot identify the first order of a month.
+DATE_FORMAT() is used to present dates in user-friendly formats.
+EXTRACT() retrieves specific date components such as year, month, or day.
+For "first order in every month", use MIN(order_date) with a correlated subquery or ROW_NUMBER() (MySQL 8+), not LAST_DAY().
+
+✅ Day 6 (Part 3) Completed 🎉
+
+Tomorrow we'll begin Module 07 – SQL String Functions, another highly important interview topic.
